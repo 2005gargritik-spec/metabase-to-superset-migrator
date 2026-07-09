@@ -64,10 +64,10 @@ type Credentials = {
 }
 
 const initialCredentials: Credentials = {
-  metabase_url: 'http://localhost:3000',
+  metabase_url: '',
   metabase_email: '',
   metabase_password: '',
-  superset_url: 'http://localhost:8088',
+  superset_url: '',
   superset_username: '',
   superset_password: '',
   superset_database_id: '',
@@ -129,6 +129,15 @@ function App() {
 
   async function loadDashboards(event?: FormEvent) {
     event?.preventDefault()
+    if (
+  credentials.metabase_url.includes("localhost") ||
+  credentials.metabase_url.includes("127.0.0.1")
+) {
+  setMessage(
+    "Please enter a publicly accessible Metabase URL. Localhost cannot be reached by the cloud backend."
+  )
+  return
+}
     setLoading('dashboards')
     setMessage('Connecting to Metabase and reading accessible dashboards...')
     try {
@@ -151,6 +160,15 @@ function App() {
 
   async function loadDatabases(event?: FormEvent) {
     event?.preventDefault()
+    if (
+  credentials.superset_url.includes("localhost") ||
+  credentials.superset_url.includes("127.0.0.1")
+) {
+  setMessage(
+    "Please enter a publicly accessible Superset URL. Localhost cannot be reached by the cloud backend."
+  )
+  return
+}
     setLoading('databases')
     setMessage('Authenticating with Superset and reading database metadata...')
     try {
@@ -333,6 +351,7 @@ function App() {
               <Database size={17} />
               Edit Connections
             </button>
+            
             <button className="secondary compact" disabled={loading === 'dashboards'} onClick={() => loadDashboards()}>
               <RefreshCw size={17} />
               Retry Metabase
@@ -422,11 +441,29 @@ function App() {
   )
 }
 
-function Field(props: { label: string; value: string; onChange: (value: string) => void; type?: string }) {
+function Field(props: {
+  label: string
+  value: string
+  onChange: (value: string) => void
+  type?: string
+}) {
+  const placeholders: Record<string, string> = {
+    "URL": "https://metabase.company.com",
+    "Email": "admin@company.com",
+    "Username": "admin",
+    "Password": "Enter password"
+  }
+
   return (
     <label className="field">
       <span>{props.label}</span>
-      <input required type={props.type ?? 'text'} value={props.value} onChange={event => props.onChange(event.target.value)} />
+      <input
+        required
+        placeholder={placeholders[props.label] ?? props.label}
+        type={props.type ?? "text"}
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+      />
     </label>
   )
 }

@@ -70,8 +70,15 @@ def metabase_dashboards(request: MetabaseCredentials):
         return _normalize_dashboards(metabase.get_dashboards())
     except requests.HTTPError as exc:
         raise HTTPException(status_code=401, detail=_http_error_message("Metabase", exc)) from exc
-    except requests.RequestException as exc:
-        raise HTTPException(status_code=502, detail=f"Could not reach Metabase: {exc}") from exc
+    except Exception as exc:
+       import traceback
+
+    traceback.print_exc()
+
+    raise HTTPException(
+        status_code=500,
+        detail=str(exc),
+    ) from exc
 
 
 @router.post("/superset/databases", response_model=list[SupersetDatabaseSummary])
@@ -97,8 +104,15 @@ def superset_databases(request: SupersetCredentials):
         return sorted(databases, key=lambda item: item.name.lower())
     except requests.HTTPError as exc:
         raise HTTPException(status_code=401, detail=_http_error_message("Superset", exc)) from exc
-    except requests.RequestException as exc:
-        raise HTTPException(status_code=502, detail=f"Could not reach Superset: {exc}") from exc
+    except Exception as exc:
+     import traceback
+
+    traceback.print_exc()
+
+    raise HTTPException(
+        status_code=500,
+        detail=str(exc),
+    )from exc
 
 
 def _run_migration(job_id: str, request: MigrationStartRequest) -> None:
