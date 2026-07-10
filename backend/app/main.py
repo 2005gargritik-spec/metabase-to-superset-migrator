@@ -13,9 +13,13 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
         "https://metabase-to-superset-migrator.vercel.app",
+        "https://metabase-to-superset-migrator-i84fssm69-migr-ai.vercel.app",
     ],
+    allow_origin_regex=r"https://metabase-to-superset-migrator-[a-z0-9-]+\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
