@@ -15,6 +15,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import './styles.css'
+import { Button, Card } from './components/ui'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
 
@@ -229,6 +230,7 @@ function App() {
 
   const allSelected = dashboards.length > 0 && selected.size === dashboards.length
   const canMigrate = !loading
+  const isErrorMessage = message.includes('not reachable') || message.includes('Original error') || message.includes('Failed to fetch') || message.toLowerCase().includes('failed')
 
   return (
     <div className="app-shell">
@@ -241,10 +243,10 @@ function App() {
           </div>
         </div>
         <nav>
-          <button className={activeView === 'dashboard' ? 'active' : ''} onClick={() => setActiveView('dashboard')}><LayoutDashboard size={20} /> Dashboard</button>
-          <button className={activeView === 'migration' ? 'active' : ''} onClick={() => setActiveView('migration')}><RefreshCw size={20} /> Migration</button>
-          <button className={activeView === 'history' ? 'active' : ''} onClick={() => setActiveView('history')}><Activity size={20} /> History</button>
-          <button className={activeView === 'settings' ? 'active' : ''} onClick={() => setActiveView('settings')}><Settings size={20} /> Settings</button>
+          <Button variant="ghost" nav active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')}><LayoutDashboard size={20} /> Dashboard</Button>
+          <Button variant="ghost" nav active={activeView === 'migration'} onClick={() => setActiveView('migration')}><RefreshCw size={20} /> Migration</Button>
+          <Button variant="ghost" nav active={activeView === 'history'} onClick={() => setActiveView('history')}><Activity size={20} /> History</Button>
+          <Button variant="ghost" nav active={activeView === 'settings'} onClick={() => setActiveView('settings')}><Settings size={20} /> Settings</Button>
         </nav>
       </aside>
 
@@ -254,43 +256,43 @@ function App() {
             <p className="eyebrow">API-driven dashboard migration</p>
             <h1>MigrAI</h1>
           </div>
-          <button className="primary" disabled={!canMigrate} onClick={startMigration}>
+          <Button variant="primary" disabled={!canMigrate} onClick={startMigration}>
             {loading === 'migration' ? <Loader2 className="spin" size={18} /> : <Play size={18} />}
             Start Migration
-          </button>
+          </Button>
         </header>
 
         <section className="stats-grid">
           {stats.map(stat => (
-            <article className="metric-card" key={stat.label}>
-              <span>{stat.label}</span>
-              <strong className={stat.tone}>{stat.value}</strong>
-            </article>
+            <Card as="article" variant="metric" hover key={stat.label}>
+              <span className="card__label">{stat.label}</span>
+              <strong className={`card__value card__value--${stat.tone}`}>{stat.value}</strong>
+            </Card>
           ))}
         </section>
 
         {message && activeView !== 'migration' && (
-          <section className={`panel message-panel ${message.includes('not reachable') || message.includes('Original error') ? 'message-error' : 'message-info'}`}>
-            {message.includes('not reachable') || message.includes('Original error') ? <XCircle size={22} /> : <CheckCircle2 size={22} />}
+          <Card className={`message-panel ${isErrorMessage ? 'message-error' : 'message-info'}`}>
+            {isErrorMessage ? <XCircle size={22} /> : <CheckCircle2 size={22} />}
             <p>{message}</p>
-          </section>
+          </Card>
         )}
 
         {activeView === 'dashboard' && <section className="connection-grid">
-          <form className="panel" onSubmit={loadDashboards}>
+          <Card as="form" onSubmit={loadDashboards}>
             <div className="panel-title"><Database size={20} /><h2>Metabase</h2></div>
             <Field label="URL" value={credentials.metabase_url} onChange={value => updateCredential('metabase_url', value)} />
             <Field label="Email" type="email" value={credentials.metabase_email} onChange={value => updateCredential('metabase_email', value)} />
             <Field label="Password" type="password" value={credentials.metabase_password} onChange={value => updateCredential('metabase_password', value)} />
-            <button className="secondary" disabled={loading === 'dashboards'}>
+            <Button variant="secondary" fullWidth disabled={loading === 'dashboards'}>
               {loading === 'dashboards' ? <Loader2 className="spin" size={17} /> : <RefreshCw size={17} />}
               Load Dashboards
-            </button>
-          </form>
+            </Button>
+          </Card>
 
-          <form className="panel" onSubmit={loadDatabases}>
+          <Card as="form" onSubmit={loadDatabases}>
             <div className="panel-title"><Server size={20} /><h2>Apache Superset</h2></div>
-            <Field label="URL" value={credentials.superset_url} onChange={value => updateCredential('superset_url', value)} />
+            <Field label="URL" placeholder="https://superset.company.com" value={credentials.superset_url} onChange={value => updateCredential('superset_url', value)} />
             <Field label="Username" value={credentials.superset_username} onChange={value => updateCredential('superset_username', value)} />
             <Field label="Password" type="password" value={credentials.superset_password} onChange={value => updateCredential('superset_password', value)} />
             <label className="field">
@@ -302,22 +304,22 @@ function App() {
                 ))}
               </select>
             </label>
-            <button className="secondary" disabled={loading === 'databases'}>
+            <Button variant="secondary" fullWidth disabled={loading === 'databases'}>
               {loading === 'databases' ? <Loader2 className="spin" size={17} /> : <RefreshCw size={17} />}
               Load Databases
-            </button>
-          </form>
+            </Button>
+          </Card>
         </section>}
 
-        {activeView === 'dashboard' && <section className="panel dashboard-panel">
+        {activeView === 'dashboard' && <Card className="dashboard-panel">
           <div className="panel-heading">
             <div>
               <p className="eyebrow">Dashboard selection</p>
               <h2>Accessible Metabase dashboards</h2>
             </div>
-            <button className="ghost" disabled={!dashboards.length} onClick={() => setSelected(allSelected ? new Set() : new Set(dashboards.map(item => item.id)))}>
+            <Button variant="ghost" disabled={!dashboards.length} onClick={() => setSelected(allSelected ? new Set() : new Set(dashboards.map(item => item.id)))}>
               {allSelected ? 'Clear all' : 'Select all'}
-            </button>
+            </Button>
           </div>
           <div className="dashboard-list">
             {dashboards.length === 0 ? (
@@ -332,9 +334,9 @@ function App() {
               </label>
             ))}
           </div>
-        </section>}
+        </Card>}
 
-        {activeView === 'migration' && <section className="panel progress-panel">
+        {activeView === 'migration' && <Card className="progress-panel">
           <div className="panel-heading">
             <div>
               <p className="eyebrow">Migration progress</p>
@@ -347,24 +349,24 @@ function App() {
             {message || 'Connect both systems, select dashboards, then start migration.'}
           </p>
           <div className="action-row">
-            <button className="secondary compact" onClick={() => setActiveView('dashboard')}>
+            <Button variant="secondary" size="compact" fullWidth onClick={() => setActiveView('dashboard')}>
               <Database size={17} />
               Edit Connections
-            </button>
+            </Button>
             
-            <button className="secondary compact" disabled={loading === 'dashboards'} onClick={() => loadDashboards()}>
+            <Button variant="secondary" size="compact" fullWidth disabled={loading === 'dashboards'} onClick={() => loadDashboards()}>
               <RefreshCw size={17} />
               Retry Metabase
-            </button>
-            <button className="secondary compact" disabled={loading === 'databases'} onClick={() => loadDatabases()}>
+            </Button>
+            <Button variant="secondary" size="compact" fullWidth disabled={loading === 'databases'} onClick={() => loadDatabases()}>
               <RefreshCw size={17} />
               Retry Superset
-            </button>
+            </Button>
           </div>
-        </section>}
+        </Card>}
 
         {activeView === 'history' && (
-          <section className="panel report-panel">
+          <Card className="report-panel">
             <div className="panel-heading">
               <div>
                 <p className="eyebrow">History</p>
@@ -383,11 +385,11 @@ function App() {
             ) : (
               <div className="empty-state">No migration has been started in this browser session.</div>
             )}
-          </section>
+          </Card>
         )}
 
         {activeView === 'settings' && (
-          <section className="panel report-panel">
+          <Card className="report-panel">
             <div className="panel-heading">
               <div>
                 <p className="eyebrow">Settings</p>
@@ -400,18 +402,18 @@ function App() {
               <div><span>Metabase URL</span><strong>{credentials.metabase_url}</strong></div>
               <div><span>Superset URL</span><strong>{credentials.superset_url}</strong></div>
             </div>
-          </section>
+          </Card>
         )}
 
         {activeView === 'migration' && !message && (
-          <section className="panel helper-panel">
+          <Card className="helper-panel">
             <AlertCircle />
             <p>Metabase must be running at `http://localhost:3000` and Superset must be running at `http://localhost:8088`, or you must change the URLs to the correct running services.</p>
-          </section>
+          </Card>
         )}
 
         {activeView === 'migration' && job?.summary && (
-          <section className="panel report-panel">
+          <Card className="report-panel">
             <div className="panel-heading">
               <div>
                 <p className="eyebrow">Final report</p>
@@ -434,7 +436,7 @@ function App() {
                 </div>
               ))}
             </div>
-          </section>
+          </Card>
         )}
       </main>
     </div>
@@ -446,6 +448,7 @@ function Field(props: {
   value: string
   onChange: (value: string) => void
   type?: string
+  placeholder?: string
 }) {
   const placeholders: Record<string, string> = {
     "URL": "https://metabase.company.com",
@@ -459,7 +462,7 @@ function Field(props: {
       <span>{props.label}</span>
       <input
         required
-        placeholder={placeholders[props.label] ?? props.label}
+        placeholder={props.placeholder ?? placeholders[props.label] ?? props.label}
         type={props.type ?? "text"}
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
