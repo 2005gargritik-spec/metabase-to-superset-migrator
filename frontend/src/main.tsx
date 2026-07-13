@@ -1,4 +1,5 @@
 import React, { FormEvent, useMemo, useState } from 'react'
+import ReactGA from 'react-ga4'
 import { createRoot } from 'react-dom/client'
 import {
   Activity,
@@ -18,6 +19,13 @@ import './styles.css'
 import { Button, Card } from './components/ui'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8000'
+
+ReactGA.initialize("G-CDTGLWE8SG")
+
+ReactGA.send({
+  hitType: "pageview",
+  page: window.location.pathname,
+})
 
 type Dashboard = {
   id: number
